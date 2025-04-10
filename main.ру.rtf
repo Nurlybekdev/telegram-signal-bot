@@ -1,0 +1,74 @@
+{\rtf1\ansi\ansicpg1251\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\ri-19578\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+import logging\
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup\
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler\
+import random\
+import time\
+\
+# \uc0\u1058 \u1086 \u1082 \u1077 \u1085  \u1084 \u1077 \u1085  \u1095 \u1072 \u1090  ID\
+TOKEN = "\uc0\u1058 \u1042 \u1054 \u1049 _\u1058 \u1054 \u1050 \u1045 \u1053 _\u1052 \u1200 \u1053 \u1044 \u1040 "\
+CHAT_ID = "\uc0\u1058 \u1042 \u1054 \u1049 _CHAT_ID_\u1052 \u1200 \u1053 \u1044 \u1040 "\
+\
+# \uc0\u1051 \u1086 \u1075  \u1078 \u1199 \u1081 \u1077 \u1089 \u1110 \u1085  \u1179 \u1086 \u1089 \u1091 \
+logging.basicConfig(level=logging.INFO)\
+\
+# \uc0\u1041 \u1077 \u1083 \u1089 \u1077 \u1085 \u1076 \u1110 \u1083 \u1110 \u1082  \u1089 \u1090 \u1072 \u1090 \u1091 \u1089 \u1099 \
+running = False\
+\
+def start(update: Update, context: CallbackContext):\
+    keyboard = [\
+        [InlineKeyboardButton("\uc0\u55357 \u56960  \u1057 \u1090 \u1072 \u1088 \u1090 ", callback_data="start")],\
+        [InlineKeyboardButton("\uc0\u55357 \u57041  \u1057 \u1090 \u1086 \u1087 ", callback_data="stop")]\
+    ]\
+    reply_markup = InlineKeyboardMarkup(keyboard)\
+    update.message.reply_text("\uc0\u1057 \u1080 \u1075 \u1085 \u1072 \u1083  \u1073 \u1086 \u1090 \u1179 \u1072  \u1179 \u1086 \u1096  \u1082 \u1077 \u1083 \u1076 \u1110 \u1187 !\\n\\n\u1058 \u1257 \u1084 \u1077 \u1085 \u1076 \u1077 \u1075 \u1110  \u1073 \u1072 \u1090 \u1099 \u1088 \u1084 \u1072 \u1083 \u1072 \u1088 \u1076 \u1099  \u1179 \u1086 \u1083 \u1076 \u1072 \u1085 :", reply_markup=reply_markup)\
+\
+def button(update: Update, context: CallbackContext):\
+    global running\
+    query = update.callback_query\
+    query.answer()\
+\
+    if query.data == "start":\
+        running = True\
+        query.edit_message_text("\uc0\u1057 \u1080 \u1075 \u1085 \u1072 \u1083 \u1076 \u1072 \u1088  \u1078 \u1110 \u1073 \u1077 \u1088 \u1110 \u1083 \u1077 \u1076 \u1110 ... \u55357 \u57314 ")\
+        send_signals(context)\
+    elif query.data == "stop":\
+        running = False\
+        query.edit_message_text("\uc0\u1057 \u1080 \u1075 \u1085 \u1072 \u1083 \u1076 \u1072 \u1088  \u1090 \u1086 \u1179 \u1090 \u1072 \u1090 \u1099 \u1083 \u1076 \u1099 . \u55357 \u56628 ")\
+\
+def send_signals(context: CallbackContext):\
+    global running\
+    pairs = ["EUR/USD", "USD/JPY", "GBP/USD", "AUD/USD", "USD/CAD"]\
+    directions = ["BUY", "SELL"]\
+    timeframes = ["1 minute", "5 minute"]\
+\
+    while running:\
+        pair = random.choice(pairs)\
+        direction = random.choice(directions)\
+        timeframe = random.choice(timeframes)\
+\
+        signal = f"\{pair\}\\n\{timeframe\}\\n\{direction\}"\
+        context.bot.send_message(chat_id=CHAT_ID, text=signal)\
+        time.sleep(60)  # \uc0\u1240 \u1088  \u1084 \u1080 \u1085 \u1091 \u1090  \u1089 \u1072 \u1081 \u1099 \u1085  \u1089 \u1080 \u1075 \u1085 \u1072 \u1083 \
+\
+def main():\
+    updater = Updater(TOKEN, use_context=True)\
+    dp = updater.dispatcher\
+\
+    dp.add_handler(CommandHandler("start", start))\
+    dp.add_handler(CallbackQueryHandler(button))\
+\
+    updater.start_polling()\
+    updater.idle()\
+\
+if __name__ == '__main__':\
+    main()\
+}
